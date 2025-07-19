@@ -1,6 +1,6 @@
 # Node.js TypeScript Backend Starter Template
 
-A robust starter template for Node.js backend applications with TypeScript, Express, PostgreSQL, and JWT authentication.
+A clean starter template for Node.js backend applications with TypeScript, Express, PostgreSQL, and JWT authentication.
 
 ## Tech Stack
 
@@ -52,11 +52,11 @@ npm run start
 
 ## Database Setup
 
-The application uses PostgreSQL with an `app_schema` namespace. To set up the database:
+The application uses PostgreSQL for user authentication and management. To set up the database:
 
 1. Install PostgreSQL on your system
 2. Create a database named `app_db` (or as configured in your .env)
-3. Run the SQL script in `tables/table_v1.sql` to create the schema and tables
+3. Run the SQL script in `tables/table_v1.sql` to create the auth schema and tables
 
 ```bash
 # Example using psql
@@ -104,8 +104,7 @@ The template comes with a default admin user:
 
 2. **User Management**
    - User registration
-   - User profile management
-   - Role assignment
+   - Role-based authorization
 
 3. **API Structure**
    - RESTful API design
@@ -125,10 +124,6 @@ The template comes with a default admin user:
 - `POST /api/auth/login` - Login and receive JWT tokens
 - `POST /api/auth/refresh-token` - Refresh access token
 - `POST /api/auth/revoke-token` - Revoke refresh token (logout)
-
-### User Management
-- `GET /api/users/profile` - Get current user profile
-- `PUT /api/users/profile` - Update user profile
 
 ## Testing
 
@@ -164,7 +159,7 @@ npm test
 
 ## Extending the Template
 
-This template provides the basic structure to build any backend application. To extend it:
+This clean authentication-focused template provides the foundation to build any backend application. To extend it:
 
 1. Add new routes in the `routes/` directory
 2. Create corresponding controllers, services, and repositories
