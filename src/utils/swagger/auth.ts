@@ -180,7 +180,7 @@ export const authPaths = {
                         },
                         role: {
                            type: 'string',
-                           enum: ['user', 'business_owner', 'admin'],
+                           enum: ['user', 'admin'],
                            default: 'user',
                            description: 'User\'s role in the system'
                         },

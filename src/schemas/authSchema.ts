@@ -4,7 +4,7 @@ export const registerSchema = z.object({
    email: z.string().email(),
    password: z.string().min(6),
    username: z.string().min(3),
-   role: z.enum(['user', 'business_owner', 'admin']).default('user'),
+   role: z.enum(['user', 'admin']).default('user'),
    is_active: z.boolean().optional().default(true),
    is_email_verified: z.boolean().optional().default(false)
 });

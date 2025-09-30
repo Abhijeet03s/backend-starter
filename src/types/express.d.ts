@@ -3,7 +3,7 @@ import { Express } from 'express-serve-static-core';
 declare module 'express-serve-static-core' {
    interface Request {
       user?: {
-         id: number;
+         id: string;
          email: string;
          username: string;
          is_active: boolean;

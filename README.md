@@ -1,136 +1,173 @@
-# Node.js TypeScript Backend Starter Template
+# Node.js + Firestore Backend Template
 
-A clean starter template for Node.js backend applications with TypeScript, Express, PostgreSQL, and JWT authentication.
+A production-ready backend template built with Node.js, TypeScript, Express, Google Cloud Firestore, and JWT authentication. Perfect for building scalable backend applications with Google Cloud Platform.
 
 ## Tech Stack
 
 - **Language:** TypeScript
 - **Framework:** Express.js
-- **Database:** PostgreSQL
-- **Authentication:** JWT
+- **Database:** Google Cloud Firestore (NoSQL)
+- **Authentication:** JWT with refresh tokens
 - **Validation:** Zod
 - **Testing:** Jest & Supertest
 - **API Documentation:** Swagger/OpenAPI
+- **Cloud Platform:** Google Cloud Platform (GCP)
 
 ### Development & Utilities
 - **Environment Variables:** dotenv
 - **Auto-Reload (Dev):** nodemon
+- **CORS Handling:** cors
+- **Logging:** winston
+- **File Uploads:** multer
 
-### Optional
-- **CORS Handling:** cors (Express middleware)
-- **Logging (Recommended):** winston
-- **File Uploads (if needed):** multer
+## Features
+
+✅ **Authentication System**
+- JWT-based authentication with access & refresh tokens
+- Secure password hashing with bcrypt
+- Refresh token rotation stored in Firestore
+- Role-based authorization (user, admin)
+- HTTP-only cookies for refresh tokens
+- Token revocation support
+
+✅ **Firestore Integration**
+- Application Default Credentials (no keys needed on GCP)
+- Automatic credential handling for local development
+- Collections: `users`, `refresh_tokens`
+- Transaction support
+
+✅ **Production Ready**
+- Clean architecture (Controllers → Services → Repositories)
+- Input validation with Zod schemas
+- TypeScript with strict typing
+- Swagger API documentation
+- Error handling
+- CORS configuration
 
 ## Getting Started
 
+### Prerequisites
+
+1. **Google Cloud Account** - [Create one](https://console.cloud.google.com)
+2. **Node.js** - v18 or higher
+3. **gcloud CLI** - [Install](https://cloud.google.com/sdk/docs/install)
+
+### Step 1: Clone and Install
+
 ```bash
+# Clone the repository
+git clone <your-repo-url>
+cd backend-starter
+
 # Install dependencies
 npm install
+```
 
-# Create a .env file with the following variables
+### Step 2: Setup Google Cloud Firestore
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select existing one
+3. Enable **Firestore API**
+4. Create a Firestore database:
+   - Navigate to **Firestore Database**
+   - Click **Create Database**
+   - Choose **Native mode**
+   - Select your preferred region
+   - Start in **Production mode** or **Test mode**
+
+### Step 3: Configure Local Development
+
+```bash
+# Authenticate with Google Cloud
+gcloud auth application-default login
+
+# Set your project ID
+gcloud config set project YOUR_PROJECT_ID
+```
+
+### Step 4: Environment Variables
+
+```bash
+# Copy example env file
+cp .env.example .env
+```
+
+Update `.env` with your values:
+
+```bash
+# Firestore Configuration
+GOOGLE_CLOUD_PROJECT=your-project-id
+
+# Server Configuration
+NODE_ENV=development
 PORT=8080
-JWT_SECRET=your_jwt_secret_key
-JWT_REFRESH_SECRET=your_jwt_refresh_secret_key
-JWT_EXPIRES_IN=30m
-JWT_REFRESH_EXPIRES_IN=7d
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_NAME=app_db
-FRONTEND_URL=http://localhost:3000
 
-# Run in development mode
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+# Optional: Frontend URL for CORS
+FRONTEND_URL=http://localhost:3000
+```
+
+### Step 5: Run the Application
+
+```bash
+# Development mode (with hot reload)
 npm run dev
 
 # Build for production
 npm run build
 
-# Run in production mode
-npm run start
+# Run production build
+npm start
 ```
 
-## Database Setup
-
-The application uses PostgreSQL for user authentication and management. To set up the database:
-
-1. Install PostgreSQL on your system
-2. Create a database named `app_db` (or as configured in your .env)
-3. Run the SQL script in `tables/table_v1.sql` to create the auth schema and tables
-
-```bash
-# Example using psql
-psql -U postgres -d app_db -f tables/table_v1.sql
-```
+The API will be available at: `http://localhost:8080`
 
 ## API Documentation
 
-The API is documented using Swagger UI. After starting the server, you can access the API documentation at:
-
+Interactive Swagger documentation is available at:
 ```
 http://localhost:8080/api-docs
 ```
 
-This interactive documentation allows you to:
-- View all available API endpoints
-- See detailed request and response structures
-- Test API endpoints directly from the browser
-
-## Authentication
-
-The template includes a complete JWT authentication system with:
-
-- User registration
-- Login with JWT tokens
-- Refresh token mechanism (with HTTP-only cookies)
-- Role-based authorization middleware
-- Token revocation
-
-### Default Credentials
-
-The template comes with a default admin user:
-- **Email:** admin@example.com
-- **Password:** Admin@123
-
-*Note: Change these credentials immediately in a production environment.*
-
-## Features
-
-1. **Authentication System**
-   - JWT-based authentication
-   - Secure password hashing with bcrypt
-   - Refresh token rotation
-   - Role-based authorization
-
-2. **User Management**
-   - User registration
-   - Role-based authorization
-
-3. **API Structure**
-   - RESTful API design
-   - Route middleware
-   - Error handling
-   - Input validation with Zod
-
-4. **Development Environment**
-   - Hot reloading with nodemon
-   - TypeScript support
-   - Proper project structure
+This allows you to:
+- View all API endpoints
+- See request/response schemas
+- Test endpoints directly from the browser
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/signup` - Register a new user
-- `POST /api/auth/login` - Login and receive JWT tokens
-- `POST /api/auth/refresh-token` - Refresh access token
-- `POST /api/auth/revoke-token` - Revoke refresh token (logout)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/auth/signup` | Register new user | No |
+| POST | `/api/auth/login` | Login and get tokens | No |
+| POST | `/api/auth/refresh-token` | Refresh access token | No (uses cookie) |
+| POST | `/api/auth/revoke-token` | Logout/revoke token | Yes |
 
-## Testing
+### Example Requests
 
-You can run the automated test suite with:
-
+**Sign Up:**
 ```bash
-npm test
+curl -X POST http://localhost:8080/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "username": "newuser",
+    "password": "SecurePass123",
+    "role": "user"
+  }'
+```
+
+**Login:**
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123"
+  }'
 ```
 
 ## Project Structure
@@ -139,42 +176,234 @@ npm test
 .
 ├── src/
 │   ├── config/           # Configuration files
+│   │   ├── firestore.ts  # Firestore initialization
+│   │   └── cookies.ts    # Cookie configuration
 │   ├── controllers/      # Request handlers
-│   ├── middlewares/      # Express middlewares
-│   ├── repositories/     # Database interactions
-│   ├── routes/           # API routes
-│   ├── schemas/          # Validation schemas
-│   ├── services/         # Business logic
+│   ├── middlewares/      # Express middlewares (auth, etc.)
+│   ├── repositories/     # Firestore database operations
+│   ├── routes/           # API route definitions
+│   ├── schemas/          # Zod validation schemas
+│   ├── services/         # Business logic layer
 │   ├── types/            # TypeScript type definitions
-│   └── utils/            # Utility functions
-├── tables/               # SQL scripts for database setup
-├── tests/                # Test files
-├── .env                  # Environment variables (create this)
-├── .gitignore
+│   └── utils/            # Utility functions & Swagger docs
 ├── index.ts              # Application entry point
+├── .env                  # Environment variables (create from .env.example)
+├── .env.example          # Example environment variables
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
+## Firestore Collections
+
+### `users`
+```typescript
+{
+  id: string;                    // Auto-generated document ID
+  email: string;
+  username: string;
+  password_hash: string;
+  is_active: boolean;
+  is_email_verified: boolean;
+  roles: string[];               // ['user'] or ['admin']
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+```
+
+### `refresh_tokens`
+```typescript
+{
+  id: string;                    // Auto-generated document ID
+  user_id: string;               // Reference to user document
+  refresh_token: string;
+  expires_at: Timestamp;
+  is_revoked: boolean;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+```
+
+## Deployment to Google Cloud Platform
+
+### Deploy to Cloud Run (Recommended)
+
+```bash
+# Build and deploy
+gcloud run deploy backend-api \
+  --source . \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=your-project-id,JWT_SECRET=your-secret
+```
+
+### Deploy to App Engine
+
+Create `app.yaml`:
+```yaml
+runtime: nodejs20
+env: standard
+
+env_variables:
+  GOOGLE_CLOUD_PROJECT: "your-project-id"
+  JWT_SECRET: "your-jwt-secret"
+  NODE_ENV: "production"
+```
+
+Deploy:
+```bash
+gcloud app deploy
+```
+
+### Environment Variables for Production
+
+Set these in your GCP service:
+```bash
+GOOGLE_CLOUD_PROJECT=your-project-id
+JWT_SECRET=strong-secret-key
+NODE_ENV=production
+PORT=8080  # Cloud Run sets this automatically
+```
+
 ## Extending the Template
 
-This clean authentication-focused template provides the foundation to build any backend application. To extend it:
+This template provides a solid foundation. Here's how to extend it:
 
-1. Add new routes in the `routes/` directory
-2. Create corresponding controllers, services, and repositories
-3. Define validation schemas with Zod
-4. Update the database schema as needed
+### 1. Add New Features
+
+```typescript
+// src/routes/yourFeatureRoutes.ts
+import express from 'express';
+import { isAuth } from '@/middlewares/authMiddleware';
+
+const router = express.Router();
+
+router.get('/items', isAuth, yourController.getItems);
+router.post('/items', isAuth, yourController.createItem);
+
+export default router;
+```
+
+### 2. Create Services & Repositories
+
+```typescript
+// src/repositories/yourRepository.ts
+import { db } from '@/config/firestore';
+
+export class YourRepository {
+  async getItems() {
+    const snapshot = await db.collection('items').get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }
+}
+```
+
+### 3. Add Validation Schemas
+
+```typescript
+// src/schemas/yourSchema.ts
+import { z } from 'zod';
+
+export const createItemSchema = z.object({
+  name: z.string().min(3),
+  description: z.string().optional(),
+});
+```
 
 ## Security Considerations
 
-For production deployments:
-- Replace the default admin user
-- Use strong, unique secrets for JWT tokens
-- Enable HTTPS
-- Consider implementing rate limiting
-- Set appropriate CORS settings based on your frontend domains
+### Production Checklist
+
+- [ ] Change JWT_SECRET to a strong random value
+- [ ] Enable HTTPS (automatic on Cloud Run/App Engine)
+- [ ] Configure CORS for your frontend domain
+- [ ] Set up rate limiting (use `express-rate-limit`)
+- [ ] Enable Firestore security rules
+- [ ] Set up monitoring and logging
+- [ ] Review and limit IAM permissions
+- [ ] Enable DDoS protection
+- [ ] Set up Cloud Armor (optional)
+
+### Firestore Security Rules Example
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /refresh_tokens/{tokenId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+## Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+## Useful Commands
+
+```bash
+# Check TypeScript errors
+npm run build
+
+# Format code (if prettier is configured)
+npm run format
+
+# Lint code (if eslint is configured)
+npm run lint
+
+# View Firestore data
+gcloud firestore databases list
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**"Error: Could not load the default credentials"**
+- Run: `gcloud auth application-default login`
+- Make sure GOOGLE_CLOUD_PROJECT is set in .env
+
+**"Permission denied" errors**
+- Check Firestore security rules
+- Verify your service account has proper IAM roles
+
+**Build errors**
+- Run: `npm install` to ensure all dependencies are installed
+- Check TypeScript version compatibility
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
 This project is open source and available under the MIT License.
+
+## Support
+
+For issues and questions:
+- Check the [documentation](https://cloud.google.com/firestore/docs)
+- Review existing issues
+- Create a new issue with detailed information
+
+---
+
+**Built with ❤️ for the Node.js and Google Cloud community**

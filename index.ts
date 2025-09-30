@@ -9,8 +9,8 @@ import { swaggerDocument, swaggerOptions } from '@/utils/swagger';
 // Load environment variables
 dotenv.config();
 
-// Initialize database connection
-import '@/config/database';
+// Initialize Firestore connection
+import '@/config/firestore';
 
 const app = express();
 
@@ -28,7 +28,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOp
 
 // API Routes
 app.get('/', (req, res) => {
-   res.json({ message: 'Welcome to BestInCiti API' });
+   res.json({ message: 'Welcome to Node.js + Firestore Backend API' });
 });
 
 // API Routes with prefix

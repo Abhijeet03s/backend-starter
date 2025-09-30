@@ -18,7 +18,7 @@ export class AuthService {
    /**
     * Generate JWT access token
     */
-   generateAccessToken(userId: number, email: string): string {
+   generateAccessToken(userId: string, email: string): string {
       const secret = process.env.JWT_SECRET;
       if (!secret) throw new Error('JWT_SECRET not configured');
 
@@ -39,7 +39,7 @@ export class AuthService {
    /**
     * Generate and store tokens
     */
-   async generateTokens(userId: number, email: string, res: Response): Promise<TokenResponse> {
+   async generateTokens(userId: string, email: string, res: Response): Promise<TokenResponse> {
       const accessToken = this.generateAccessToken(userId, email);
       const refreshToken = this.generateRefreshToken();
 
@@ -93,59 +93,17 @@ export class AuthService {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(userData.password, salt);
 
-      // Create user with transaction to ensure both user and role are created
-      return await this.repository.transaction(async (client: any) => {
-         // Create user
-         const createUserQuery = `
-            INSERT INTO bestinciti_prod.m_users (
-               email, 
-               password_hash, 
-               username, 
-               is_active, 
-               is_email_verified,
-               created_at,
-               updated_at
-            ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-            RETURNING id, email, username, is_active, is_email_verified
-         `;
-         
-         const userResult = await client.query(createUserQuery, [
-            userData.email,
-            hashedPassword,
-            userData.username,
-            userData.is_active,
-            userData.is_email_verified
-         ]);
-         
-         const newUser = userResult.rows[0];
-
-         // Find the role
-         const findRoleQuery = `
-            SELECT * FROM bestinciti_prod.m_roles
-            WHERE role_name = $1
-         `;
-         
-         const roleResult = await client.query(findRoleQuery, [userData.role]);
-         const role = roleResult.rows[0];
-
-         if (!role) {
-            throw new Error(`Role ${userData.role} not found`);
-         }
-
-         // Assign role to user
-         const assignRoleQuery = `
-            INSERT INTO bestinciti_prod.m_user_roles (
-               user_id, 
-               role_id, 
-               created_at, 
-               updated_at
-            ) VALUES ($1, $2, NOW(), NOW())
-         `;
-         
-         await client.query(assignRoleQuery, [newUser.id, role.id]);
-
-         return newUser;
+      // Create user with role
+      const newUser = await this.repository.createUser({
+         email: userData.email,
+         password_hash: hashedPassword,
+         username: userData.username,
+         is_active: userData.is_active,
+         is_email_verified: userData.is_email_verified,
+         roles: [userData.role]
       });
+
+      return newUser;
    }
 
    /**
@@ -170,15 +128,12 @@ export class AuthService {
          throw new Error('Invalid credentials');
       }
 
-      // Format user data (remove password_hash and format roles)
+      // Format user data (remove password_hash)
       const { password_hash, ...userInfo } = user;
-      
-      // Get role names from the roles array
-      const userRoles = user.roles?.map((ur: { role: { role_name: string } }) => ur.role.role_name) || [];
-      
+
       return {
          ...userInfo,
-         roles: userRoles.filter(Boolean) // Filter out any undefined values
+         roles: user.roles || []
       };
    }
 

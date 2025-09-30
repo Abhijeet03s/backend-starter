@@ -1,6 +1,6 @@
 // JWT payload structure
 export interface JwtPayload {
-   id: number;
+   id: string;
    email: string;
 }
 
@@ -13,7 +13,7 @@ export interface UserRole {
 
 // User with roles structure used in authentication
 export interface UserWithRoles {
-   id: number;
+   id: string;
    email: string;
    username: string;
    is_active: boolean | null;
@@ -23,7 +23,7 @@ export interface UserWithRoles {
 
 // User data attached to request
 export interface UserData {
-   id: number;
+   id: string;
    email: string;
    username: string;
    is_active: boolean;
